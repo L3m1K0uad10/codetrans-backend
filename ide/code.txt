@@ -1,0 +1,40 @@
+
+class Person:
+    """
+    a person object taking as attributes name, nationality 
+    and age 
+    """
+    def __init__(self, name, nationality, age):
+        self.name = name
+        self.nationality = nationality
+        self.age = age 
+
+    def infos(self): # displaying a person informations
+        print(f"NAME:  {self.name}")
+        print(f"NATIONALITY:  {self.nationality}")
+        print(f"AGE:  {self.age}")
+
+'''initiate some persons instances'''
+person1 = Person("Jacob", "african", 30)
+person2 = Person("Jack", "european", 27)
+
+'''printing the informations of each person'''
+person1.infos()
+person2.infos()
+
+database = [] # initializing an empty db 
+
+def storage(instance):
+    """
+    adding each instance of person to the database for further
+    retrieval and uses
+    """
+    database.append(instance)
+
+storage(person1)
+storage(person2)
+print(database)
+
+
+    
+    

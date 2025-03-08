@@ -70,17 +70,20 @@ class CommentDetails:
                                 "end_col": token.end[1]
                             }
                     else:
+                        print(token)
                         precedent =  token.line[token.start[1] - 3 : token.start[1]] # get the 3 characters before the start of the string for checking the possibility of nested strings
 
                         if precedent != "":
                             if "+ - * / = ( [ {".find(precedent) == -1:
                                 self.comments["multiline comment"][len(self.comments["multiline comment"]) + 1] = {
                                     "start_line": token.start[0],
+                                    "col": token.start[1],
                                     "end_line": token.end[0]
                                 }
                         else:
                             self.comments["multiline comment"][len(self.comments["multiline comment"]) + 1] = {
                                 "start_line": token.start[0],
+                                "col": token.start[1],
                                 "end_line": token.end[0]
                             }    
 

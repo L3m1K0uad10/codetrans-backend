@@ -32,3 +32,8 @@ def find_all(string):
 
     return word_pos
 
+
+def string_token_length(string):
+    string_list = string.split()
+    
+    return len(string_list)

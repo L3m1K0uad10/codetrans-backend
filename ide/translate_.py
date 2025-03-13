@@ -1,5 +1,7 @@
 from transformers import MarianMTModel, MarianTokenizer
 
+from utils.helpers import string_token_length
+
 
 
 """
@@ -14,19 +16,8 @@ e.g2
     this is a multiline comment
     end of comment'''
 """
-def translate_with_marian(code, details):
-    model_name = "Helsinki-NLP/opus-mt-en-fr"
-    model = MarianMTModel.from_pretrained(model_name)
-    tokenizer = MarianTokenizer.from_pretrained(model_name)
 
-    comments = details.get("comment")
-    variables = details.get("variable")
-    function_identifiers = details.get("function_identifier")
-    class_identifiers = details.get("class_identifier")
-
-    splitted_code = code.split("\n")
-    translated_code = splitted_code
-
+def translate_comments(comments, splitted_code, translated_code, model, tokenizer):
     for key, value in comments.items():
         if key == "single comment" or key == "inline comment":
             for key_, value_ in value.items():
@@ -44,7 +35,6 @@ def translate_with_marian(code, details):
 
                 # the translation of '''expr...''' can result into <<expr...>> therefore handle it
                 if translated_str.find("«") == value_["start_col"] - 1 and translated_str.find("»") == value_["end_col"] - 1:
-                    print("found")
                     symbol = splitted_code[value_["line"] - 1][value_["start_col"] - 1:value_["start_col"] + 2]
                     translated_str = translated_str.replace("«", symbol)
                     translated_str = translated_str.replace("»", symbol)
@@ -84,7 +74,57 @@ def translate_with_marian(code, details):
                     if i == value_["end_line"] and post_substring != "":
                         translated_str = translated_str + post_substring
                     translated_code[i - 1] = prev_substring + translated_str
-                
+    
+    return translated_code
+
+
+def translate_variables(variables, splitted_code, translated_code, model, tokenizer):
+    for key, value in variables.items():
+        for key_, value_ in value.items():
+            variable = key 
+
+            translated = model.generate(**tokenizer(
+                variable,
+                return_tensors = "pt",
+                padding = True
+            ))
+
+            translated_var = tokenizer.decode(translated[0], skip_special_tokens = True)
+
+            # replacing the whitespace with underscore encountered in the translation of the variable in case
+            if string_token_length(translated_var) > 1:
+                translated_var = translated_var.replace(" ", "_")
+ 
+            # not really using the variables details provided, just translating all occurences of the variable
+            line = splitted_code[value_["line"] - 1]
+            translated_line = line.replace(variable, translated_var)
+
+            translated_code[value_["line"] - 1] = translated_line
+            #print("translated_code: ", variable, translated_code)
+
+    return translated_code 
+
+"""
+TODO: 
+fix the issue of not {self.name} ... not being retrieved as a variable to be translated
+finish the implementation of the function_identifier and class_identifier translation
+"""
+
+def translate_with_marian(code, details):
+    model_name = "Helsinki-NLP/opus-mt-en-fr"
+    model = MarianMTModel.from_pretrained(model_name)
+    tokenizer = MarianTokenizer.from_pretrained(model_name)
+
+    comments = details.get("comment")
+    variables = details.get("variable")
+    function_identifiers = details.get("function_identifier")
+    class_identifiers = details.get("class_identifier")
+
+    splitted_code = code.split("\n")
+    translated_code = splitted_code
+
+    translated_code_ = translate_comments(comments, splitted_code, translated_code, model, tokenizer) 
+    translated_code = translate_variables(variables, splitted_code, translated_code, model, tokenizer)     
     
     translated_code = '\n'.join(translated_code)
     return translated_code
@@ -98,7 +138,7 @@ def translate(code, details):
     return translate_with_marian(code, details)
     
         
-        
+
 file_path = "/Users/apple/Documents/projects/codetrans-backend/ide/code.txt"
 
 # Read the content of the program file

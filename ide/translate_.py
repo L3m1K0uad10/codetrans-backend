@@ -16,7 +16,7 @@ def translate_with_marian(code, details):
     translated_code = splitted_code
 
     for key, value in comments.items():
-        """ if key == "single comment" or key == "inline comment":
+        if key == "single comment" or key == "inline comment":
             for key_, value_ in value.items():
                 #print(value_)                      - 1 because while splitting the code, the index starts from 0
                 #print(splitted_code[value_["line"] - 1][value_["start_col"] - 1:value_["end_col"]])
@@ -29,10 +29,9 @@ def translate_with_marian(code, details):
                 ))
 
                 translated_str = tokenizer.decode(translated[0], skip_special_tokens = True)
-                #print(translated_str)
                 prev_substring = splitted_code[value_["line"] - 1][:value_["start_col"] - 1]
                 translated_code[value_["line"] - 1] = prev_substring + translated_str
-                #translated_code.replace(comment, translated_str) """
+
         if key == "multiline comment":
             for key_, value_ in value.items():
                 for i in range(value_["start_line"], value_["end_line"] + 1):
@@ -45,9 +44,9 @@ def translate_with_marian(code, details):
                             comment = splitted_code[i - 1][value_["col"] - 1:len(splitted_code[i - 1]) - 2]
                             prev_substring = splitted_code[i - 1][:value_["col"] + 3]
                         else:
-                            prev_substring = splitted_code[i - 1][:value_["col"] - 1]
+                            prev_substring = splitted_code[i - 1][:value_["col"]]
                     if comment == '"""' or comment == "'''":
-                        comment = ""
+                        comment = "null"
                         prev_substring = splitted_code[i - 1][:value_["col"] + 3]
 
                     translated = model.generate(**tokenizer(
@@ -57,7 +56,8 @@ def translate_with_marian(code, details):
                     ))
 
                     translated_str = tokenizer.decode(translated[0], skip_special_tokens = True)
-                    prev_substring = splitted_code[i - 1][:value_["col"] - 1]
+                    if comment == "null":
+                        translated_str = ""
                     translated_code[i - 1] = prev_substring + translated_str
                 
     

@@ -2,6 +2,18 @@ from transformers import MarianMTModel, MarianTokenizer
 
 
 
+"""
+NOTE: i handle multiline comments type:
+e.g1
+    '''
+    this is a multiline comment
+    end of comment
+    '''
+e.g2
+    '''start of comment:
+    this is a multiline comment
+    end of comment'''
+"""
 def translate_with_marian(code, details):
     model_name = "Helsinki-NLP/opus-mt-en-fr"
     model = MarianMTModel.from_pretrained(model_name)
@@ -34,15 +46,18 @@ def translate_with_marian(code, details):
 
         if key == "multiline comment":
             for key_, value_ in value.items():
+                post_substring = "" # to store the substring after the comment(end_line handling purposes)
                 for i in range(value_["start_line"], value_["end_line"] + 1):
                     comment = splitted_code[i - 1][value_["col"]:len(splitted_code[i - 1]) + 1]
                     if comment != '"""' and comment != "'''":
                         if i == value_["start_line"]:
-                            comment = splitted_code[i - 1][value_["col"] + 2:len(splitted_code[i - 1]) + 1]
+                            comment = splitted_code[i - 1][value_["col"] + 3:len(splitted_code[i - 1]) + 1]
+                            print(comment)
                             prev_substring = splitted_code[i - 1][:value_["col"] + 3]
                         elif i == value_["end_line"]:
-                            comment = splitted_code[i - 1][value_["col"] - 1:len(splitted_code[i - 1]) - 2]
-                            prev_substring = splitted_code[i - 1][:value_["col"] + 3]
+                            comment = splitted_code[i - 1][value_["col"] - 1:len(splitted_code[i - 1]) - 3]
+                            prev_substring = splitted_code[i - 1][:value_["col"]]
+                            post_substring = splitted_code[i - 1][value_["col"] + len(comment) - 1:len(splitted_code[i - 1])]
                         else:
                             prev_substring = splitted_code[i - 1][:value_["col"]]
                     if comment == '"""' or comment == "'''":
@@ -58,6 +73,8 @@ def translate_with_marian(code, details):
                     translated_str = tokenizer.decode(translated[0], skip_special_tokens = True)
                     if comment == "null":
                         translated_str = ""
+                    if i == value_["end_line"] and post_substring != "":
+                        translated_str = translated_str + post_substring
                     translated_code[i - 1] = prev_substring + translated_str
                 
     

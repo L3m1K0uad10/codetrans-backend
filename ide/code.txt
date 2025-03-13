@@ -1,9 +1,9 @@
 
 class Person:
-    """
+    """Person object details:
     a person object taking as attributes name, nationality 
     and age 
-    """
+    end of comment"""
     def __init__(self, name, nationality, age):
         self.name = name
         self.nationality = nationality

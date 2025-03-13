@@ -41,6 +41,14 @@ def translate_with_marian(code, details):
                 ))
 
                 translated_str = tokenizer.decode(translated[0], skip_special_tokens = True)
+
+                # the translation of '''expr...''' can result into <<expr...>> therefore handle it
+                if translated_str.find("«") == value_["start_col"] - 1 and translated_str.find("»") == value_["end_col"] - 1:
+                    print("found")
+                    symbol = splitted_code[value_["line"] - 1][value_["start_col"] - 1:value_["start_col"] + 2]
+                    translated_str = translated_str.replace("«", symbol)
+                    translated_str = translated_str.replace("»", symbol)
+
                 prev_substring = splitted_code[value_["line"] - 1][:value_["start_col"] - 1]
                 translated_code[value_["line"] - 1] = prev_substring + translated_str
 

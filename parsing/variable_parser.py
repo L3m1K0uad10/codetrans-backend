@@ -13,35 +13,6 @@ also we consider class instance name belongs to variables group
 """
 
 
-# Sample Python code to be parsed
-code = '''
-def get_func_identifier(token_pos, func_token, instruction):
-    """ 
-    returns a function identifier's positions, start and end col
-    """
-
-    identifier_start_pos = token_pos + (len(func_token) - 1) + 2 
-
-    # let's find the occurence position of ( 
-    lbracket = instruction.find("(")
-
-    identifier_end_pos  = lbracket - 1 
-
-    varx = 10
-
-    varx = varx + 1 + (varx * varx)
-
-    return identifier_start_pos, identifier_end_pos 
-
-class Person:
-    def __init__(self, name):
-        self.name = name
-    def display(self):
-        print(self.name)
-
-p1 = Person("Lemi")
-p1.display()
-'''
 
 """  
 ast.NodeVisitor is a base class that allows you to traverse 
@@ -85,25 +56,6 @@ class VariableExtractor(ast.NodeVisitor):
         return self.variables
 
 
-# parsing a code data with python built-in library ast
-parsed_code = ast.parse(code)
-"""ast.dump(parsed_code, indent = 4)    ===> print the parsed code AST structure"""
-
-
-# Create an extractor instance and visit nodes
-extractor = VariableExtractor()
-extractor.visit(parsed_code)
-
-# Get the extracted variables
-extracted_variables = extractor.get_variables()
-
-# Print the extracted variables
-print("Extracted variables:", extracted_variables)
-
-
-# check the occurence and the length of the variable which will determined its start col and end col
-
-
 class VariableDetails:
     variables = []
     def __init__(self, instructions:list, variables:set):
@@ -121,7 +73,7 @@ class VariableDetails:
                     dict_[variable] = tokens_occurences[variable]
 
             if len(dict_) != 0:
-                dict_["line"] = i
+                dict_["line"] = i + 1
                 VariableDetails.variables.append(dict_)
         
         return VariableDetails.variables
@@ -157,11 +109,3 @@ class VariableDetails:
         return json_data
 
 
-splitted_code = code.split("\n")
-variable_details = VariableDetails(splitted_code, extracted_variables)
-#res = variable_details.add()
-json_details = variable_details.get_detail()
-
-#print(VariableDetails.variables)
-#print("\n")
-print(json.dumps(json_details, indent = 4))

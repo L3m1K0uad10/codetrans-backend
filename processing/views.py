@@ -8,7 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from parsing.comment_parser import CommentDetails
 from parsing.function_identifier_parser import FunctionIdentifierExtractor, FunctionIdentifierDetails
 from parsing.class_identifier_parser import ClassIdentifierExtractor, ClassIdentifierDetails
-
+from parsing.variable_parser import VariableExtractor, VariableDetails
 
 
 def retrieve_tokens(code):
@@ -22,6 +22,14 @@ def retrieve_tokens(code):
     # comment details
     comment = CommentDetails(code)
     comment_details = comment.get_details()
+
+    # variable details
+    variable_extractor = VariableExtractor()
+    variable_extractor.visit(parsed_code)
+    extracted_variables = variable_extractor.get_variables()
+
+    variable_details = VariableDetails(splitted_code, extracted_variables)
+    variable_details = variable_details.get_detail()
 
     # function identifier details
     function_idf_extractor = FunctionIdentifierExtractor()
@@ -41,6 +49,7 @@ def retrieve_tokens(code):
 
     data = {
         "comment": comment_details,
+        "variable": variable_details,
         "function_identifier": function_identifier_details,
         "class_identifier": class_identifier_details
     }

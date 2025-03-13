@@ -44,7 +44,7 @@ class ClassIdentifierDetails:
                     dict_[identifier] = tokens_occurences[identifier]
 
             if len(dict_) != 0:
-                dict_["line"] = i
+                dict_["line"] = i + 1
                 ClassIdentifierDetails.identifiers.append(dict_)
 
         return ClassIdentifierDetails.identifiers

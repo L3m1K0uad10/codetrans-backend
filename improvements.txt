@@ -1,0 +1,14 @@
+
+IMPROVEMENTS
+------------
+
+======================================================================================================
+- using better translation model like google translation API paid version
+- provide flexibility to user on translation which tokens exactly they want to translate
+  e.g a specific comment
+- should include translation for other languages like C/C++ etc...
+- should provide translation for other file like README files etc... that play a role in communication
+  also SRS doc as well etc... 
+- auto-generated comment as needed
+- auto-generated explanation of code logic
+=======================================================================================================

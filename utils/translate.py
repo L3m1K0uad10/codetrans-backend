@@ -4,6 +4,7 @@ from googletrans import Translator
 from transformers import MarianMTModel, MarianTokenizer
 
 
+
 async def get_translation(comment, **kwargs):
     translator = Translator()
     translated_comment = await translator.translate(comment, dest = "fr")
@@ -33,6 +34,11 @@ def translate_with_marian(comment):
 
 
 def translate(comment):
+    """ 
+    code: str - code content
+    details: dict - details of the code tokens to be translated 
+    """
+    
     try:
         return translate_with_marian(comment)
     except Exception as e:
@@ -44,5 +50,5 @@ def translate(comment):
             return None
         
         
-response = translate("# var = expr + 3")
+response = translate("# This is a comment")
 print(response) 

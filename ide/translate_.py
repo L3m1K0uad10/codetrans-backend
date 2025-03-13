@@ -13,16 +13,15 @@ def translate_with_marian(code, details):
     class_identifiers = details.get("class_identifier")
 
     splitted_code = code.split("\n")
-    #print(splitted_code)
     translated_code = splitted_code
 
     for key, value in comments.items():
-        if key == "single comment" or key == "inline comment":
+        """ if key == "single comment" or key == "inline comment":
             for key_, value_ in value.items():
                 #print(value_)                      - 1 because while splitting the code, the index starts from 0
                 #print(splitted_code[value_["line"] - 1][value_["start_col"] - 1:value_["end_col"]])
                 comment = splitted_code[value_["line"] - 1][value_["start_col"] - 1:value_["end_col"]]
-                
+
                 translated = model.generate(**tokenizer(
                     comment,
                     return_tensors = "pt",
@@ -33,20 +32,37 @@ def translate_with_marian(code, details):
                 #print(translated_str)
                 prev_substring = splitted_code[value_["line"] - 1][:value_["start_col"] - 1]
                 translated_code[value_["line"] - 1] = prev_substring + translated_str
-                #translated_code.replace(comment, translated_str)
+                #translated_code.replace(comment, translated_str) """
+        if key == "multiline comment":
+            for key_, value_ in value.items():
+                for i in range(value_["start_line"], value_["end_line"] + 1):
+                    comment = splitted_code[i - 1][value_["col"]:len(splitted_code[i - 1]) + 1]
+                    if comment != '"""' and comment != "'''":
+                        if i == value_["start_line"]:
+                            comment = splitted_code[i - 1][value_["col"] + 2:len(splitted_code[i - 1]) + 1]
+                            prev_substring = splitted_code[i - 1][:value_["col"] + 3]
+                        elif i == value_["end_line"]:
+                            comment = splitted_code[i - 1][value_["col"] - 1:len(splitted_code[i - 1]) - 2]
+                            prev_substring = splitted_code[i - 1][:value_["col"] + 3]
+                        else:
+                            prev_substring = splitted_code[i - 1][:value_["col"] - 1]
+                    if comment == '"""' or comment == "'''":
+                        comment = ""
+                        prev_substring = splitted_code[i - 1][:value_["col"] + 3]
+
+                    translated = model.generate(**tokenizer(
+                        comment,
+                        return_tensors = "pt",
+                        padding = True
+                    ))
+
+                    translated_str = tokenizer.decode(translated[0], skip_special_tokens = True)
+                    prev_substring = splitted_code[i - 1][:value_["col"] - 1]
+                    translated_code[i - 1] = prev_substring + translated_str
+                
     
     translated_code = '\n'.join(translated_code)
     return translated_code
-    
-    """ translated = model.generate(**tokenizer(
-            comment,
-            return_tensors = "pt",
-            padding = True
-        ))
-    
-    res = tokenizer.decode(translated[0], skip_special_tokens = True) """
-
-    return res
 
 
 def translate(code, details):

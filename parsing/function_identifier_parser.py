@@ -40,7 +40,7 @@ class FunctionIdentifierDetails:
                     dict_[identifier] = tokens_occurences[identifier]
 
             if len(dict_) != 0:
-                dict_["line"] = i
+                dict_["line"] = i + 1
                 FunctionIdentifierDetails.identifiers.append(dict_)
         
         return FunctionIdentifierDetails.identifiers

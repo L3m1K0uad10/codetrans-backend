@@ -5,10 +5,14 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 
-from parsing.comment_parser import CommentDetails
+from parsing import CommentDetails, FunctionIdentifierExtractor, FunctionIdentifierDetails, ClassIdentifierExtractor, ClassIdentifierDetails, VariableExtractor, VariableDetails
+from translation import GoogleTranslationLayer, MarianTranslationLayer
+
+
+""" from parsing.comment_parser import CommentDetails
 from parsing.function_identifier_parser import FunctionIdentifierExtractor, FunctionIdentifierDetails
 from parsing.class_identifier_parser import ClassIdentifierExtractor, ClassIdentifierDetails
-from parsing.variable_parser import VariableExtractor, VariableDetails
+from parsing.variable_parser import VariableExtractor, VariableDetails """
 
 
 def retrieve_tokens(code):
@@ -57,11 +61,25 @@ def retrieve_tokens(code):
     return data
 
 
-def translate_tokens(data, code):
+def translate_tokens(code, details):
     """
     translate the tokens to the code
+    code: str - code content
+    details: dict - details of the code tokens to be translated 
     """
-    pass
+    try:
+        maria_translation_layer = MarianTranslationLayer(code, details)
+        maria_translation = maria_translation_layer.translate()
+        return maria_translation
+    except Exception as e:
+        print(f"MarianMTModel failed: {e}")
+        try:
+            google_translation_layer = GoogleTranslationLayer(code, details)
+            google_translation = google_translation_layer.translate()
+            return google_translation
+        except Exception as e:
+            print(f"Googletrans failed: {e}")
+            return None
 
 
 @csrf_exempt
@@ -73,7 +91,10 @@ def ProcessingView(request, pk = None, *args, **kwargs):
 
             code = data.get("file_content")
             
-            data = retrieve_tokens(code)
+            details = retrieve_tokens(code)
+            translated_code = translate_tokens(code, details)
+
+            data["translated_code"] = translated_code
 
             return JsonResponse(data, status = 200)
         except Exception as e:

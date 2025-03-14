@@ -24,6 +24,8 @@ response = requests.post(endpoint, json = data)
 # Handle the response
 if response.status_code == 200:
     print("File content sent successfully!")
-    print(json.dumps(response.json(), indent = 4))
+    #print(json.dumps(response.json(), indent = 4))
+    data = response.json()
+    print(data["translated_code"])
 else:
     print("Failed to send content. Status code: ", response.status_code)

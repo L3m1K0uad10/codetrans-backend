@@ -70,7 +70,6 @@ class CommentDetails:
                                 "end_col": token.end[1]
                             }
                     else:
-                        print(token)
                         precedent =  token.line[token.start[1] - 3 : token.start[1]] # get the 3 characters before the start of the string for checking the possibility of nested strings
 
                         if precedent != "":

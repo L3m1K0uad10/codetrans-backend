@@ -1,6 +1,6 @@
 from transformers import MarianMTModel, MarianTokenizer
 
-from utils.helpers import string_token_length
+from utils.helpers import string_token_length, construct_tokenized_string
 
 
 
@@ -82,6 +82,7 @@ def translate_variables(variables, splitted_code, translated_code, model, tokeni
     for key, value in variables.items():
         for key_, value_ in value.items():
             variable = key 
+            variable = construct_tokenized_string(variable)
 
             translated = model.generate(**tokenizer(
                 variable,
@@ -92,12 +93,16 @@ def translate_variables(variables, splitted_code, translated_code, model, tokeni
             translated_var = tokenizer.decode(translated[0], skip_special_tokens = True)
 
             # replacing the whitespace with underscore encountered in the translation of the variable in case
+            if "'" in translated_var:
+                id = translated_var.find("'")
+                translated_var = translated_var.replace("'", "")
+                translated_var = translated_var.replace(translated_var[id - 1], "")
             if string_token_length(translated_var) > 1:
                 translated_var = translated_var.replace(" ", "_")
  
             # not really using the variables details provided, just translating all occurences of the variable
             line = splitted_code[value_["line"] - 1]
-            translated_line = line.replace(variable, translated_var)
+            translated_line = line.replace(key, translated_var)
 
             translated_code[value_["line"] - 1] = translated_line
             #print("translated_code: ", variable, translated_code)
@@ -109,6 +114,71 @@ TODO:
 fix the issue of not {self.name} ... not being retrieved as a variable to be translated
 finish the implementation of the function_identifier and class_identifier translation
 """
+
+def translate_function_identifier(function_identifiers, splitted_code, translated_code, model, tokenizer):
+    for key, value in function_identifiers.items():
+        for key_, value_ in value.items():
+            function_identifier = key 
+            function_identifier = construct_tokenized_string(function_identifier)
+
+            translated = model.generate(**tokenizer(
+                function_identifier,
+                return_tensors = "pt",
+                padding = True
+            ))
+            
+            translated_func_id = tokenizer.decode(translated[0], skip_special_tokens = True)
+
+            # replacing the whitespace with underscore encountered in the translation of the function_identifier in case
+            # also handling quotes in the translation in case
+            if "'" in translated_func_id:
+                id = translated_func_id.find("'")
+                translated_func_id = translated_func_id.replace("'", "")
+                translated_func_id = translated_func_id.replace(translated_func_id[id - 1], "")
+            if string_token_length(translated_func_id) > 1:
+                translated_func_id = translated_func_id.replace(" ", "_")
+ 
+            # not really using the function_identifiers details provided, just translating all occurences of the function_identifier
+            line = splitted_code[value_["line"] - 1]
+            translated_line = line.replace(key, translated_func_id)
+
+            translated_code[value_["line"] - 1] = translated_line
+
+    return translated_code  
+
+
+def translate_class_identifier(class_identifiers, splitted_code, translated_code, model, tokenizer):
+    for key, value in class_identifiers.items():
+        for key_, value_ in value.items():
+            class_identifiers = key 
+            class_identifiers = construct_tokenized_string(class_identifiers)
+
+            translated = model.generate(**tokenizer(
+                class_identifiers,
+                return_tensors = "pt",
+                padding = True
+            ))
+            
+            translated_cls_id = tokenizer.decode(translated[0], skip_special_tokens = True)
+
+            # replacing the whitespace with underscore encountered in the translation of the class_identifiers in case
+            # also handling quotes in the translation in case
+            if "'" in translated_cls_id:
+                id = translated_cls_id.find("'")
+                translated_cls_id = translated_cls_id.replace("'", "")
+                translated_cls_id = translated_cls_id.replace(translated_cls_id[id - 1], "")
+            if string_token_length(translated_cls_id) > 1:
+                translated_cls_id = translated_cls_id.replace(" ", "_")
+ 
+            # not really using the class_identifiers details provided, just translating all occurences of the class_identifiers
+            line = splitted_code[value_["line"] - 1]
+            translated_line = line.replace(key, translated_cls_id)
+
+            translated_code[value_["line"] - 1] = translated_line
+
+    return translated_code  
+
+
 
 def translate_with_marian(code, details):
     model_name = "Helsinki-NLP/opus-mt-en-fr"
@@ -124,7 +194,9 @@ def translate_with_marian(code, details):
     translated_code = splitted_code
 
     translated_code_ = translate_comments(comments, splitted_code, translated_code, model, tokenizer) 
-    translated_code = translate_variables(variables, splitted_code, translated_code, model, tokenizer)     
+    translated_code = translate_variables(variables, splitted_code, translated_code, model, tokenizer)    
+    translated_code = translate_function_identifier(function_identifiers, splitted_code, translated_code, model, tokenizer) 
+    translated_code = translate_class_identifier(class_identifiers, splitted_code, translated_code, model, tokenizer)
     
     translated_code = '\n'.join(translated_code)
     return translated_code
@@ -343,7 +415,7 @@ details = {
         }
     },
     "function_identifier": {
-        "infos": {
+        "print_infos": {
             "1": {
                 "line": 12,
                 "start_col": 9,

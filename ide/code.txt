@@ -9,7 +9,7 @@ class Person:
         self.nationality = nationality
         self.age = age 
 
-    def infos(self): # displaying a person informations
+    def print_infos(self): # displaying a person informations
         print(f"NAME:  {self.name}")
         print(f"NATIONALITY:  {self.nationality}")
         print(f"AGE:  {self.age}")
@@ -19,8 +19,8 @@ person1 = Person("Jacob", "african", 30)
 person2 = Person("Jack", "european", 27)
 
 '''printing the informations of each person'''
-person1.infos()
-person2.infos()
+person1.print_infos()
+person2.print_infos()
 
 database = [] # initializing an empty db 
 

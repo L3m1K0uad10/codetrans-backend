@@ -1,6 +1,6 @@
 /myenv
 /__pycache__
-
+/ide
 
 translate_comment.py
 translate_comment2.py

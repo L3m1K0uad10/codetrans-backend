@@ -147,11 +147,14 @@ class GoogleTranslationLayer:
 
                 self.translated_code[value_["line"] - 1] = translated_line
 
-    def translate(self):
-        self._translate_comments()
-        self._translate_variables()
-        self._translate_function_identifier()
-        self._translate_class_identifier()
+    def translate(self, level):
+        if level == "Complete":
+            self._translate_comments()
+            self._translate_variables()
+            self._translate_function_identifier()
+            self._translate_class_identifier()
+        else:
+            self._translate_comments()
 
         translated_code = '\n'.join(self.translated_code)
         return translated_code

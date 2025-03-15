@@ -39,9 +39,15 @@ class MarianTranslationLayer:
 
                     # the translation of '''expr...''' can result into <<expr...>> therefore handle it
                     if translated_str.find("«") == value_["start_col"] - 1 and translated_str.find("»") == value_["end_col"] - 1:
+                        print("translated: ", translated_str)
                         symbol = self.splitted_code[value_["line"] - 1][value_["start_col"] - 1:value_["start_col"] + 2]
                         translated_str = translated_str.replace("«", symbol)
                         translated_str = translated_str.replace("»", symbol)
+                    # another weird case handling e.g ''comment'''
+                    if (translated_str[0:2] == "''" and translated_str[2] != "'") or (translated_str[0:2] == '""' and translated_str[2] != '"'):
+                        symbol = self.splitted_code[value_["line"] - 1][value_["start_col"] - 1:value_["start_col"] + 2]
+                        translated_str = translated_str.replace(self.splitted_code[value_["line"] - 1][value_["start_col"] - 1: value_["start_col"] + 1], symbol)
+                        translated_str = translated_str[:len(translated_str) - 1]
 
                     prev_substring = self.splitted_code[value_["line"] - 1][:value_["start_col"] - 1]
                     self.translated_code[value_["line"] - 1] = prev_substring + translated_str
@@ -167,12 +173,15 @@ class MarianTranslationLayer:
 
                 self.translated_code[value_["line"] - 1] = translated_line
 
-    def translate(self):
-        self._translate_comments()
-        self._translate_variables()
-        self._translate_function_identifier()
-        self._translate_class_identifier()
-
+    def translate(self, level):
+        if level == "Complete":
+            self._translate_comments()
+            self._translate_variables()
+            self._translate_function_identifier()
+            self._translate_class_identifier()
+        else:
+            self._translate_comments()
+            
         translated_code = '\n'.join(self.translated_code)
         return translated_code
     

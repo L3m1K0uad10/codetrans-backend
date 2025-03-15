@@ -15,7 +15,7 @@ from parsing.class_identifier_parser import ClassIdentifierExtractor, ClassIdent
 from parsing.variable_parser import VariableExtractor, VariableDetails """
 
 
-def retrieve_tokens(code):
+def retrieve_tokens(code, level = "Complete"):
     """  
     retrieve the tokens: comments, class and function identifiers from a code file
     """
@@ -23,45 +23,54 @@ def retrieve_tokens(code):
     splitted_code = code.split("\n")
     parsed_code = ast.parse(code)
 
-    # comment details
-    comment = CommentDetails(code)
-    comment_details = comment.get_details()
+    if level == "Complete":
+        # comment details
+        comment = CommentDetails(code)
+        comment_details = comment.get_details()
 
-    # variable details
-    variable_extractor = VariableExtractor()
-    variable_extractor.visit(parsed_code)
-    extracted_variables = variable_extractor.get_variables()
+        # variable details
+        variable_extractor = VariableExtractor()
+        variable_extractor.visit(parsed_code)
+        extracted_variables = variable_extractor.get_variables()
 
-    variable_details = VariableDetails(splitted_code, extracted_variables)
-    variable_details = variable_details.get_detail()
+        variable_details = VariableDetails(splitted_code, extracted_variables)
+        variable_details = variable_details.get_detail()
 
-    # function identifier details
-    function_idf_extractor = FunctionIdentifierExtractor()
-    function_idf_extractor.visit(parsed_code)
-    extracted_identifiers = function_idf_extractor.get_identifiers()
+        # function identifier details
+        function_idf_extractor = FunctionIdentifierExtractor()
+        function_idf_extractor.visit(parsed_code)
+        extracted_identifiers = function_idf_extractor.get_identifiers()
 
-    function_identifier = FunctionIdentifierDetails(splitted_code, extracted_identifiers)
-    function_identifier_details = function_identifier.get_detail()
+        function_identifier = FunctionIdentifierDetails(splitted_code, extracted_identifiers)
+        function_identifier_details = function_identifier.get_detail()
 
-    # class identifier details
-    class_idf_extractor = ClassIdentifierExtractor()
-    class_idf_extractor.visit(parsed_code)
-    extracted_identifiers = class_idf_extractor.get_identifiers()
+        # class identifier details
+        class_idf_extractor = ClassIdentifierExtractor()
+        class_idf_extractor.visit(parsed_code)
+        extracted_identifiers = class_idf_extractor.get_identifiers()
 
-    class_identifier = ClassIdentifierDetails(splitted_code, extracted_identifiers)
-    class_identifier_details = class_identifier.get_detail()
+        class_identifier = ClassIdentifierDetails(splitted_code, extracted_identifiers)
+        class_identifier_details = class_identifier.get_detail()
 
-    data = {
-        "comment": comment_details,
-        "variable": variable_details,
-        "function_identifier": function_identifier_details,
-        "class_identifier": class_identifier_details
-    }
+        data = {
+            "comment": comment_details,
+            "variable": variable_details,
+            "function_identifier": function_identifier_details,
+            "class_identifier": class_identifier_details
+        }
+    else:
+        # comment details
+        comment = CommentDetails(code)
+        comment_details = comment.get_details()
+
+        data = {
+            "comment": comment_details,
+        }
 
     return data
 
 
-def translate_tokens(code, details):
+def translate_tokens(code, details, level = "Complete"):
     """
     translate the tokens to the code
     code: str - code content
@@ -69,13 +78,13 @@ def translate_tokens(code, details):
     """
     try:
         maria_translation_layer = MarianTranslationLayer(code, details)
-        maria_translation = maria_translation_layer.translate()
+        maria_translation = maria_translation_layer.translate(level)
         return maria_translation
     except Exception as e:
         print(f"MarianMTModel failed: {e}")
         try:
             google_translation_layer = GoogleTranslationLayer(code, details)
-            google_translation = google_translation_layer.translate()
+            google_translation = google_translation_layer.translate(level)
             return google_translation
         except Exception as e:
             print(f"Googletrans failed: {e}")
@@ -90,9 +99,10 @@ def ProcessingView(request, pk = None, *args, **kwargs):
             data = json.loads(request.body.decode("utf-8"))
 
             code = data.get("file_content")
+            level = data.get("level")
             
-            details = retrieve_tokens(code)
-            translated_code = translate_tokens(code, details)
+            details = retrieve_tokens(code, level)
+            translated_code = translate_tokens(code, details, level)
 
             data["translated_code"] = translated_code
 

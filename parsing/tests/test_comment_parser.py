@@ -45,7 +45,6 @@ Deeply nested string inside another nested string.
 """
     comment = CommentDetails(code)
     details = comment.get_details()
-    print(details)
 
     expected_details =  {
         "single comment": {

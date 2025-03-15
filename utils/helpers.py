@@ -1,7 +1,7 @@
 import re 
 
 
-pattern = r"[ ,.():\"\[\]]+" # delimiters used to split our string
+pattern = r"[ ,.():\"\[\]\{\}]+" # delimiters used to split our string
 
 def find_all(string):
     """  

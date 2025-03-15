@@ -35,13 +35,12 @@ class CommentDetails:
 
     def extract_comments(self):
         tokens = tokenize.generate_tokens(StringIO(self.code).readline) # gets the information of the tokens like start and end position
-        #print(tokens)
+
         """ line_comments = {}
         multiline_comments = []
         current_multiline = None """
 
         for token in tokens:
-            #print(token)
             if token.type == tokenize.COMMENT:
                 self.comments["single comment"][len(self.comments["single comment"]) + 1] = {
                     "line": token.start[0],

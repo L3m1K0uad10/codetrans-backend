@@ -26,12 +26,12 @@ class ClassIdentifierExtractor(ast.NodeVisitor):
 
 
 class ClassIdentifierDetails:
-    identifiers = []
     def __init__(self, instructions:list, identifiers:set):
         self.instructions = instructions
         self.identifiers = identifiers
 
         self.details = {}
+        self.identifiers_data = []
     
     def _occurence(self):
         for i, instruction in enumerate(self.instructions):
@@ -45,9 +45,9 @@ class ClassIdentifierDetails:
 
             if len(dict_) != 0:
                 dict_["line"] = i + 1
-                ClassIdentifierDetails.identifiers.append(dict_)
+                self.identifiers_data.append(dict_)
 
-        return ClassIdentifierDetails.identifiers
+        return self.identifiers_data
     
     def get_detail(self):
         self._occurence()
@@ -55,7 +55,7 @@ class ClassIdentifierDetails:
         
         count = 0
 
-        for line_identifiers in ClassIdentifierDetails.identifiers:
+        for line_identifiers in self.identifiers_data:
             for identifier in self.identifiers:
                 if identifier in line_identifiers.keys():
                     for i in range(len(line_identifiers[identifier])):

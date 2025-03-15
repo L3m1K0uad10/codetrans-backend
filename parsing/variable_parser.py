@@ -57,10 +57,11 @@ class VariableExtractor(ast.NodeVisitor):
 
 
 class VariableDetails:
-    variables = []
+    
     def __init__(self, instructions:list, variables:set):
         self.instructions = instructions
         self.variables = variables
+        self.variables_data = []
     
     def _occurence(self):
         for i, instruction in enumerate(self.instructions):
@@ -74,10 +75,9 @@ class VariableDetails:
 
             if len(dict_) != 0:
                 dict_["line"] = i + 1
-                VariableDetails.variables.append(dict_)
+                self.variables_data.append(dict_)
         
-        return VariableDetails.variables
-    
+        return self.variables_data
 
     def get_detail(self):
         self._occurence()
@@ -85,7 +85,7 @@ class VariableDetails:
         json_data = {}
         count = 0
 
-        for line_variables in VariableDetails.variables:
+        for line_variables in self.variables_data:
             for variable in self.variables:
                 if variable in line_variables.keys():
                     for i in range(len(line_variables[variable])):

@@ -55,3 +55,11 @@ def construct_tokenized_string(string):
     string_list = string.split("_")
 
     return " ".join(string_list)
+
+
+def is_empty_string(s):
+    """
+    check if a string is empty whitespace character(s)
+    returns True if yes and False if not
+    """
+    return s.isspace()

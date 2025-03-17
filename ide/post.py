@@ -2,7 +2,7 @@ import requests
 import json
 
 # File path (you can dynamically fetch the path of the opened file in your code editor)
-file_path = "/Users/apple/Documents/projects/codetrans-backend/ide/code.txt"
+file_path = "/Users/apple/Documents/projects/codetrans-backend/ide/code2.py"
 
 # Read the content of the program file
 with open(file_path, 'r') as file:

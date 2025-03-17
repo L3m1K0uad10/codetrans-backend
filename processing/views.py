@@ -9,11 +9,6 @@ from parsing import CommentDetails, FunctionIdentifierExtractor, FunctionIdentif
 from translation import GoogleTranslationLayer, MarianTranslationLayer
 
 
-""" from parsing.comment_parser import CommentDetails
-from parsing.function_identifier_parser import FunctionIdentifierExtractor, FunctionIdentifierDetails
-from parsing.class_identifier_parser import ClassIdentifierExtractor, ClassIdentifierDetails
-from parsing.variable_parser import VariableExtractor, VariableDetails """
-
 
 def retrieve_tokens(code, level = "Complete"):
     """  
